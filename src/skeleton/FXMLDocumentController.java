@@ -10,15 +10,19 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -29,9 +33,14 @@ import javafx.util.Duration;
  */
 public class FXMLDocumentController implements Initializable {
     private  MediaPlayer mediaplayer;
+    boolean playing = false;
+    private InvalidationListener listener;
     private String filepath;
+    // TimeLine Slider
     @FXML
-    private Slider slider;
+    private Slider tSlider;
+    @FXML
+    private Slider vSlider;
     @FXML
     private Label label;
 //    @FXML
@@ -40,8 +49,7 @@ public class FXMLDocumentController implements Initializable {
     private MediaView mediaview;
     @FXML
     private void handleButtonAction(ActionEvent event) {
-        System.out.println("You clicked me!");
-        //label.setText("Hello World!");
+        
         FileChooser chooser = new FileChooser();
         //This is used to filter the extentions
         FileChooser.ExtensionFilter filter  =  new FileChooser.ExtensionFilter("sth", "*.mp4");
@@ -56,29 +64,51 @@ public class FXMLDocumentController implements Initializable {
             mediaplayer = new MediaPlayer(media);
             // Add the mediaplayer to media view
             mediaview.setMediaPlayer(mediaplayer);
- 
-            //To let the video fill the spaces left
-//            DoubleProperty width = mediaview.fitWidthProperty();
-//            DoubleProperty height = mediaview.fitHeightProperty();
-//            
-//            width.bind(Bindings.selectDouble(mediaview.sceneProperty(), "width"));
-//            height.bind(Bindings.selectDouble(mediaview.sceneProperty(), "height"));
             
-            slider.setValue(mediaplayer.getStartTime().toSeconds());
-            while(mediaplayer.getCurrentTime().toSeconds() !=  0){
-                slider.setValue(mediaplayer.getCurrentTime().toSeconds());
-            }
-            
-            slider.valueProperty().addListener(new InvalidationListener() {
-            
+           // This is used to synchronize the video player with the tSlider
+            mediaplayer.currentTimeProperty().addListener(new ChangeListener<Duration>(){
+
                 @Override
-                public void invalidated(Observable observable) {
-//                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                       mediaplayer.seek(Duration.seconds(slider.getValue()));
+                public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
+                    tSlider.setValue(newValue.toSeconds());
+                  
+                }
+                
+            });
+            
+            // This two lets the video be seeked through the tSlider
+            tSlider.setOnMouseDragged(new EventHandler<MouseEvent>(){
+
+                @Override
+                public void handle(MouseEvent event) {
+                    mediaplayer.seek(Duration.seconds(tSlider.getValue()));
+                }
+                
+            });
+            
+         
+            tSlider.setOnMousePressed(new EventHandler<MouseEvent>(){
+
+                @Override
+                public void handle(MouseEvent event) {
+                    mediaplayer.seek(Duration.seconds(tSlider.getValue()));
+                }
+                
+            });
+            
+            
+            // This helps to set the endpoint for the tSlider to be the same as the video end time
+            mediaplayer.setOnReady(new Runnable() {
+
+                @Override
+                public void run() {
+                   Duration time =  media.getDuration();
+                   tSlider.setMax(time.toSeconds());
                 }
             });
+            
+           
             mediaplayer.play();
-           // mediaplayer.pause();
         }
     }
     @FXML
@@ -112,7 +142,10 @@ public class FXMLDocumentController implements Initializable {
    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        tSlider.showTickMarksProperty().setValue(true);
+        tSlider.showTickLabelsProperty().setValue(true);
+       
+        
     }     
     
 }

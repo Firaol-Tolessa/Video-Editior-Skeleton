@@ -1,0 +1,18 @@
+.slider {
+    -fx-background-color: red;
+    
+}
+.slider .track{
+    -fx-background-color:aquamarine;
+}
+
+#tSlider .thumb{
+    -fx-background-image :url("https://icons.iconarchive.com/icons/google/noto-emoji-people-clothing-objects/32/12210-gem-stone-icon.png");   
+    -fx-background-size: cover;
+    -fx-padding: 24;
+    -f-fx-background-color:black;
+}
+.root{
+ 
+     -fx-background-color:aquamarine;
+}

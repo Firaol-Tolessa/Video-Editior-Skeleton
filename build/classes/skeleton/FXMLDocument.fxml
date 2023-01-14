@@ -9,7 +9,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skeleton.FXMLDocumentController">
+<AnchorPane stylesheets="@Style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skeleton.FXMLDocumentController">
    <children>
       <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1366.0">
          <effect>
@@ -20,7 +20,7 @@
                <children>
                   <SplitPane dividerPositions="0.4875366568914956" prefHeight="436.0" prefWidth="1366.0">
                     <items>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                      <AnchorPane fx:id="root" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                            <children>
                               <Label layoutX="261.0" layoutY="171.0" text="FILE STRUCTURE" />
                            </children>
@@ -47,7 +47,7 @@
                                                 <Button mnemonicParsing="false" onAction="#handlePlay" text="play" />
                                              </children>
                                           </HBox>
-                                          <Slider fx:id="slider" prefHeight="14.0" prefWidth="528.0" />
+                                          <Slider fx:id="vSlider" prefHeight="14.0" prefWidth="528.0" style="-fx-background-image: url(&quot;C:\Users\SWL\Documents\NetBeansProjects\Skeleton\src\skeleton\slider.png&quot;);" />
                                        </children>
                                     </VBox>
                                  </bottom>
@@ -61,6 +61,7 @@
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="104.0" prefWidth="1364.0">
                            <children>
                               <Label layoutX="668.0" layoutY="72.0" text="TIME LINE" />
+                              <Slider fx:id="tSlider" onDragDetected="#handleFast" onDragEntered="#handleFast" onMouseDragEntered="#handleFast" prefHeight="6.0" prefWidth="1366.0" snapToTicks="true" />
                            </children>
                         </AnchorPane>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
