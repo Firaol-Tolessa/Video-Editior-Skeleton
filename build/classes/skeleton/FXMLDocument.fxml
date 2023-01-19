@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.media.*?>
 <?import javafx.scene.effect.*?>
@@ -11,7 +12,7 @@
 
 <AnchorPane stylesheets="@Style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skeleton.FXMLDocumentController">
    <children>
-      <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1366.0">
+      <Pane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1366.0">
          <effect>
             <Blend />
          </effect>
@@ -20,48 +21,63 @@
                <children>
                   <SplitPane dividerPositions="0.4875366568914956" prefHeight="436.0" prefWidth="1366.0">
                     <items>
-                      <AnchorPane fx:id="root" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                            <children>
                               <Label layoutX="261.0" layoutY="171.0" text="FILE STRUCTURE" />
                            </children>
                         </AnchorPane>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                        <StackPane>
                            <children>
-                              <Label layoutX="306.0" layoutY="192.0" text="VIDEO PLAYER" />
-                              <BorderPane prefHeight="434.0" prefWidth="696.0">
-                                 <center>
-                                    <MediaView fx:id="mediaview" fitHeight="350.0" fitWidth="610.0" BorderPane.alignment="CENTER">
-                                       <viewport>
-                                          <Rectangle2D />
-                                       </viewport>
-                                    </MediaView>
-                                 </center>
-                                 <bottom>
-                                    <VBox prefHeight="73.0" prefWidth="700.0" BorderPane.alignment="CENTER">
-                                       <children>
-                                          <HBox prefHeight="25.0" prefWidth="219.0">
+                              <Label text="VIDEO PLAYER" />
+                              <Label text="WHAT IS UP" />
+                              <MediaView fx:id="mediaview" fitHeight="350.0" fitWidth="610.0">
+                                 <viewport>
+                                    <Rectangle2D />
+                                 </viewport>
+                              </MediaView>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <BorderPane prefHeight="434.0" prefWidth="696.0" style="-fx-background-image: url(&quot;@../../../../../Desktop/logo.png&quot;);">
+                                       <bottom>
+                                          <VBox prefHeight="73.0" prefWidth="700.0" BorderPane.alignment="CENTER">
                                              <children>
-                                                <Button mnemonicParsing="false" onAction="#handleButtonAction" text="open" />
-                                                <Button mnemonicParsing="false" onAction="#handleStop" text="stop" />
-                                                <Button mnemonicParsing="false" onAction="#handlePause" text="pause" />
-                                                <Button mnemonicParsing="false" onAction="#handlePlay" text="play" />
+                                                <HBox prefHeight="25.0" prefWidth="219.0">
+                                                   <children>
+                                                      <Button mnemonicParsing="false" onAction="#handleButtonAction" text="open" />
+                                                      <Button mnemonicParsing="false" onAction="#handleStop" text="stop" />
+                                                      <Button mnemonicParsing="false" onAction="#handlePause" text="pause" />
+                                                      <Button mnemonicParsing="false" onAction="#handlePlay" text="play" />
+                                                   </children>
+                                                </HBox>
+                                                <Slider fx:id="vSlider" prefHeight="14.0" prefWidth="528.0" style="-fx-background-image: url(&quot;C:\Users\SWL\Documents\NetBeansProjects\Skeleton\src\skeleton\slider.png&quot;);" />
                                              </children>
-                                          </HBox>
-                                          <Slider fx:id="vSlider" prefHeight="14.0" prefWidth="528.0" style="-fx-background-image: url(&quot;C:\Users\SWL\Documents\NetBeansProjects\Skeleton\src\skeleton\slider.png&quot;);" />
-                                       </children>
-                                    </VBox>
-                                 </bottom>
-                              </BorderPane>
+                                          </VBox>
+                                       </bottom>
+                                    </BorderPane>
+                                 </children>
+                              </AnchorPane>
                            </children>
-                        </AnchorPane>
+                        </StackPane>
                     </items>
                   </SplitPane>
-                  <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="328.0" prefWidth="1366.0">
-                    <items>
+                  <VBox>
+                     <children>
+                        <HBox>
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#handleCut" text="CUT" />
+                              <Button fx:id="trim" mnemonicParsing="false" onAction="#handleTrim" text="TRIM" />
+                           </children>
+                        </HBox>
+                        <Slider fx:id="tSlider" onDragEntered="#handleFast" onMouseDragEntered="#handleFast" prefHeight="6.0" prefWidth="1366.0" />
+                        <Slider fx:id="tSliderEnd" onDragEntered="#handleFast" onMouseDragEntered="#handleFast" prefHeight="6.0" prefWidth="1366.0" />
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="104.0" prefWidth="1364.0">
                            <children>
                               <Label layoutX="668.0" layoutY="72.0" text="TIME LINE" />
-                              <Slider fx:id="tSlider" onDragDetected="#handleFast" onDragEntered="#handleFast" onMouseDragEntered="#handleFast" prefHeight="6.0" prefWidth="1366.0" snapToTicks="true" />
+                              <ImageView fx:id="timeLineImage" fitHeight="150.0" fitWidth="1364.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../../../Desktop/test/output2.png" />
+                                 </image>
+                              </ImageView>
                            </children>
                         </AnchorPane>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
@@ -69,8 +85,8 @@
                               <Label layoutX="668.0" layoutY="55.0" text="EFFECTS" />
                            </children>
                         </AnchorPane>
-                    </items>
-                  </SplitPane>
+                     </children>
+                  </VBox>
                </children>
             </VBox>
          </children>

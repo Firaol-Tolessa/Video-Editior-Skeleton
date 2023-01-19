@@ -7,12 +7,17 @@
 }
 
 #tSlider .thumb{
-    -fx-background-image :url("https://icons.iconarchive.com/icons/google/noto-emoji-people-clothing-objects/32/12210-gem-stone-icon.png");   
-    -fx-background-size: cover;
-    -fx-padding: 24;
+    -fx-padding: 14;
     -f-fx-background-color:black;
 }
-.root{
- 
+
+#tSliderEnd .thumb{
+    -fx-padding: 14;
+    -fx-background-color:black;
+}
+
+
+#root{
+    -fx-background-image: url("@../../../../../Desktop/logo.png");
      -fx-background-color:aquamarine;
 }
