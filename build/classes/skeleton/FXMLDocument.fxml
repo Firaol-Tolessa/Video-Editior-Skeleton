@@ -12,85 +12,133 @@
 
 <AnchorPane stylesheets="@Style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skeleton.FXMLDocumentController">
    <children>
-      <Pane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1366.0">
+      <Pane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="676.0" prefWidth="1366.0">
          <effect>
             <Blend />
          </effect>
          <children>
-            <VBox prefHeight="768.0" prefWidth="1366.0">
+            <VBox prefHeight="718.0" prefWidth="1366.0">
                <children>
                   <SplitPane dividerPositions="0.4875366568914956" prefHeight="436.0" prefWidth="1366.0">
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                            <children>
-                              <Label layoutX="261.0" layoutY="171.0" text="FILE STRUCTURE" />
+                              <SplitPane dividerPositions="0.5984848484848485" layoutX="-1.0" prefHeight="408.0" prefWidth="662.0">
+                                 <items>
+                                    <Pane prefHeight="406.0" prefWidth="404.0">
+                                       <children>
+                                          <Button layoutX="19.0" layoutY="43.0" mnemonicParsing="false" onAction="#addOverlay" prefHeight="63.0" prefWidth="96.0" text="ADD" />
+                                          <Button layoutX="160.0" layoutY="228.0" mnemonicParsing="false" onAction="#textEdit" prefHeight="73.0" prefWidth="88.0" text="Button" />
+                                       </children>
+                                    </Pane>
+                                    <Pane fx:id="editPane" prefHeight="406.0" prefWidth="210.0" />
+                                 </items>
+                              </SplitPane>
                            </children>
                         </AnchorPane>
-                        <StackPane fx:id="effectStack">
+                        <Pane>
                            <children>
-                              <Label text="VIDEO PLAYER" />
-                              <Label text="WHAT IS UP" />
-                              <MediaView fx:id="mediaview" fitHeight="350.0" fitWidth="610.0">
-                                 <viewport>
-                                    <Rectangle2D />
-                                 </viewport>
-                              </MediaView>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                                 <children>
-                                    <BorderPane prefHeight="434.0" prefWidth="696.0" style="-fx-background-image: url(&quot;@../../../../../Desktop/logo.png&quot;);">
-                                       <bottom>
-                                          <VBox prefHeight="73.0" prefWidth="700.0" BorderPane.alignment="CENTER">
+                              <BorderPane prefHeight="434.0" prefWidth="696.0" style="-fx-background-image: url(&quot;@../../../../../Desktop/logo.png&quot;);">
+                                 <bottom>
+                                    <VBox prefHeight="73.0" prefWidth="700.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <HBox prefHeight="25.0" prefWidth="219.0">
                                              <children>
-                                                <HBox prefHeight="25.0" prefWidth="219.0">
-                                                   <children>
-                                                      <Button mnemonicParsing="false" onAction="#handleButtonAction" text="open" />
-                                                      <Button mnemonicParsing="false" onAction="#handleStop" text="stop" />
-                                                      <Button mnemonicParsing="false" onAction="#handlePause" text="pause" />
-                                                      <Button mnemonicParsing="false" onAction="#handlePlay" text="play" />
-                                                   </children>
-                                                </HBox>
-                                                <Slider fx:id="vSlider" prefHeight="14.0" prefWidth="528.0" style="-fx-background-image: url(&quot;C:\Users\SWL\Documents\NetBeansProjects\Skeleton\src\skeleton\slider.png&quot;);" />
+                                                <Button mnemonicParsing="false" onAction="#handleButtonAction" text="open" />
+                                                <Button mnemonicParsing="false" onAction="#handleStop" text="stop" />
+                                                <Button mnemonicParsing="false" onAction="#handlePause" text="pause" />
+                                                <Button mnemonicParsing="false" onAction="#handlePlay" text="play" />
                                              </children>
-                                          </VBox>
-                                       </bottom>
-                                    </BorderPane>
+                                          </HBox>
+                                          <Slider fx:id="vSlider" prefHeight="14.0" prefWidth="528.0" style="-fx-background-image: url(&quot;C:\Users\SWL\Documents\NetBeansProjects\Skeleton\src\skeleton\slider.png&quot;);" />
+                                       </children>
+                                    </VBox>
+                                 </bottom>
+                                 <center>
+                                    <MediaView fx:id="mediaview" fitHeight="350.0" fitWidth="610.0" BorderPane.alignment="CENTER">
+                                       <viewport>
+                                          <Rectangle2D />
+                                       </viewport>
+                                    </MediaView>
+                                 </center>
+                              </BorderPane>
+                              <StackPane fx:id="effectStack" focusTraversable="true" prefHeight="352.0" prefWidth="696.0">
+                                 <children>
+                                    <Label text="VIDEO PLAYER" />
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="314.0" prefWidth="696.0" />
                                  </children>
-                              </AnchorPane>
+                              </StackPane>
                            </children>
-                        </StackPane>
+                        </Pane>
                     </items>
                   </SplitPane>
-                  <VBox>
-                     <children>
-                        <HBox>
+                  <SplitPane dividerPositions="0.25733137829912023" prefHeight="243.0" prefWidth="1300.0">
+                     <items>
+                        <Pane prefHeight="247.0" prefWidth="943.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#handleCut" text="CUT" />
-                              <Button fx:id="trim" mnemonicParsing="false" onAction="#handleTrim" text="TRIM" />
+                              <Pane prefHeight="241.0" prefWidth="236.0">
+                                 <children>
+                                    <ScrollPane layoutX="46.0" layoutY="8.0" prefViewportHeight="224.0" prefViewportWidth="152.0">
+                                       <content>
+                                          <VBox fx:id="effectTreeView" layoutX="46.0" layoutY="8.0" prefHeight="224.0" prefWidth="152.0" style="-fx-background-color: red;">
+                                             <children>
+                                                <Label prefHeight="29.0" prefWidth="52.0" text="Effect" />
+                                             </children>
+                                          </VBox>
+                                       </content>
+                                    </ScrollPane>
+                                 </children>
+                              </Pane>
+                              <Button layoutX="268.0" layoutY="40.0" mnemonicParsing="false" onAction="#updateEffectTree" prefHeight="25.0" prefWidth="59.0" text="Button" />
                            </children>
-                        </HBox>
-                        <Slider fx:id="tSlider" onDragEntered="#handleFast" onMouseDragEntered="#handleFast" prefHeight="6.0" prefWidth="1366.0" />
-                        <Slider fx:id="tSliderEnd" onDragEntered="#handleFast" onMouseDragEntered="#handleFast" prefHeight="6.0" prefWidth="1366.0" />
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="104.0" prefWidth="1364.0">
+                        </Pane>
+                        <VBox prefHeight="239.0" prefWidth="927.0">
                            <children>
-                              <Label layoutX="668.0" layoutY="72.0" text="TIME LINE" />
-                              <ImageView fx:id="timeLineImage" fitHeight="150.0" fitWidth="1364.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../../../Desktop/test/output2.png" />
-                                 </image>
-                              </ImageView>
+                              <HBox>
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#handleCut" text="CUT" />
+                                    <Button fx:id="trim" mnemonicParsing="false" onAction="#handleTrim" text="TRIM" />
+                                 </children>
+                              </HBox>
+                              <Slider fx:id="tSlider" onDragEntered="#handleFast" onMouseDragEntered="#handleFast" prefHeight="6.0" prefWidth="1366.0" />
+                              <Slider fx:id="tSliderEnd" onDragEntered="#handleFast" onMouseDragEntered="#handleFast" prefHeight="6.0" prefWidth="1366.0" />
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="104.0" prefWidth="1364.0">
+                                 <children>
+                                    <Label layoutX="668.0" layoutY="72.0" text="TIME LINE" />
+                                    <ImageView fx:id="timeLineImage" fitHeight="150.0" fitWidth="1364.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../../../Desktop/test/output2.png" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                              </AnchorPane>
+                              <HBox fx:id="effectsView" prefHeight="54.0" prefWidth="1366.0" />
                            </children>
-                        </AnchorPane>
-                        <HBox fx:id="effectsView" prefHeight="100.0" prefWidth="200.0" />
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                           <children>
-                              <Label layoutX="668.0" layoutY="55.0" text="EFFECTS" />
-                           </children>
-                        </AnchorPane>
-                     </children>
-                  </VBox>
+                        </VBox>
+                     </items>
+                  </SplitPane>
                </children>
             </VBox>
          </children>
       </Pane>
+      <MenuBar prefHeight="25.0" prefWidth="327.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#textEdit" text="Text" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
    </children>
 </AnchorPane>

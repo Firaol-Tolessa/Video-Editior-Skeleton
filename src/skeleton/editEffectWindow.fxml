@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skeleton.FXMLDocumentController">
+   <children>
+      <Pane layoutX="7.0" prefHeight="253.0" prefWidth="215.0">
+         <children>
+            <Label layoutX="21.0" layoutY="43.0" text="Font Family" />
+            <Label layoutX="21.0" layoutY="76.0" text="Font SIze" />
+            <Button layoutX="35.0" layoutY="150.0" mnemonicParsing="false" text="Bold" />
+            <Button layoutX="125.0" layoutY="150.0" mnemonicParsing="false" text="Italic" />
+            <TextField layoutX="97.0" layoutY="72.0" prefHeight="25.0" prefWidth="28.0" />
+            <TextField layoutX="97.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" />
+            <Button layoutX="71.0" layoutY="202.0" mnemonicParsing="false" text="Apply" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>

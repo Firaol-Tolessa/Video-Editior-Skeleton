@@ -21,23 +21,30 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
@@ -46,11 +53,12 @@ import javafx.util.Duration;
  */
 public class FXMLDocumentController implements Initializable {
     private  MediaPlayer mediaplayer;
+    private Media media;
     boolean playing = false;
     private InvalidationListener listener;
     private File file;
-    public double[] cutTime = new double[2];
-   
+    
+    
     private String filepath;
     // TimeLine Slider
     @FXML
@@ -66,9 +74,13 @@ public class FXMLDocumentController implements Initializable {
 //    @FXML
 //    private HBox effectView;
     @FXML
+    public VBox effectTreeView;
+    @FXML
     private Button trim;
     @FXML
     private Label label;
+    @FXML
+    private Pane editPane;
 //    @FXML
 //    private Button button;
     @FXML
@@ -84,13 +96,8 @@ public class FXMLDocumentController implements Initializable {
         filepath = file.toURI().toString();
         
         if (file != null) {
-            // Make a media from a file
-            Media media = new Media(filepath);
-            // Instantiate a mediaplayer on the media
-            mediaplayer = new MediaPlayer(media);
-            // Add the mediaplayer to media view
-            mediaview.setMediaPlayer(mediaplayer);
             
+            videoSetup();
      
 //            try {
 //                if(new File("001.jpg").exists()){
@@ -105,10 +112,135 @@ public class FXMLDocumentController implements Initializable {
 //            } catch (IOException ex) {
 //                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
 //            }
-            
+        }
+    }
+    @FXML
+    private void handlePause(ActionEvent event){
+        mediaplayer.pause();
+    }
+    @FXML
+    private void handleFast(ActionEvent event){
+       mediaplayer.setRate(1.5);
+    }
+     @FXML
+    private void handleSlow(ActionEvent event){
+         mediaplayer.setRate(0.5);
+    }
+    @FXML
+    private void handleExit(ActionEvent event){
+        mediaplayer.dispose();
+    }
+    @FXML
+    private void handlePlay(ActionEvent event){
+        mediaplayer.play();
+        mediaplayer.setRate(1);
+    }
+     @FXML
+    private void handleStop(ActionEvent event){
+       System.exit(0);
+    }
+  // Displays the trim button with trim sliders 
+    @FXML
+    private void handleCut(ActionEvent event){
+        tSliderEnd.setVisible(true);
+        trim.setVisible(true);
+        System.out.println(tSlider.getValue());
+        mediaplayer.pause();
+         
+     };
+    // selected node for the stack tree
+    private Node c;
+    // Loads up the text edit panel on the editpane at home
+     @FXML
+     private void textEdit(ActionEvent event){
+        try {
+            Pane pane = FXMLLoader.load(getClass().getResource("editEffectWindow.fxml"));
+            editPane.getChildren().setAll(pane);
+            // Iterate over the widgets in the effect stack to select the widget that was clicked
+            for (Node x : effectStack.getChildren()) {
+                if(c.equals(x)){
+                    c.setVisible(false);
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+     }
+     @FXML
+    private void handleTrim(ActionEvent event){
+       int trimEnd = (int) tSlider.getValue();
+       int mediaEnd = (int)mediaplayer.getStopTime().toSeconds();
+       int trimStart = (int) tSliderEnd.getValue();
+       
+       
+       Trim edit = new Trim();
+       // Cut the video according to the start time and endTime
+       edit.Cut(media,file, trimStart, trimEnd);
+       filepath = edit.Merge("lower.mp4", "upper.mp4").toURI().toString();
+       videoSetup();
+     
+         
+        tSliderEnd.setVisible(false);
+        trim.setVisible(false);
+    }
+    
+    @FXML
+    private void addOverlay(ActionEvent event){
+        Label x = new Label("kindness !");
+        Pane pane = new Pane();
+        pane.setMaxHeight(20);
+        pane.setMaxWidth(20);
+        pane.setBackground(Background.EMPTY);
+        pane.getChildren().add(x);
+        x.setOnMouseDragged(new EventHandler<MouseEvent>(){
+
+            @Override
+            public void handle(MouseEvent event) {
+                 x.setLayoutX(event.getSceneX());
+                 x.setLayoutY(event.getSceneY());
+            }
            
-            
-           // This is used to synchronize the video player with the tSlider
+        });
+        effectStack.getChildren().add(x);
+        effectStack.getChildren().forEach(this::makeDraggable);
+    }
+    @FXML
+    private void updateEffectTree(ActionEvent event){
+        effectTreeView.getChildren().removeAll();
+        for (Node node : effectStack.getChildren()) {
+          //  effectTree.getChildrenUnmodifiable().add(node);
+            System.out.println(node.toString());
+            Button dummy  = new Button(node.toString());
+            dummy.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+                    //Make selected node global
+                    c = node;
+                    textEdit(event);
+                }
+            });
+            effectTreeView.getChildren().add(dummy);
+        }
+    }
+    //Used for storing the difference between the node and the mouse pointer
+    private double startX;
+    private double startY;
+    
+    // Handels the video loading and controls
+    private void videoSetup(){
+        if (mediaplayer != null) {
+            mediaplayer.dispose();
+        }else{
+            System.out.println("Added video :" + filepath);
+        }
+         //  mediaplayer.dispose();
+           media = new Media(filepath);
+           // Instantiate a mediaplayer on the media
+           mediaplayer = new MediaPlayer(media);
+           // Add the mediaplayer to media view
+           mediaview.setMediaPlayer(mediaplayer);
+         // This is used to synchronize the video player with the tSlider
             mediaplayer.currentTimeProperty().addListener(new ChangeListener<Duration>(){
 
                 @Override
@@ -138,12 +270,7 @@ public class FXMLDocumentController implements Initializable {
                 }
                 
             });
-            
-            
-      
-            
-            
-            
+        
             // This helps to set the endpoint for the tSlider to be the same as the video end time
             mediaplayer.setOnReady(new Runnable() {
 
@@ -157,115 +284,20 @@ public class FXMLDocumentController implements Initializable {
             
            
             mediaplayer.play();
-        }
     }
-    @FXML
-    private void handlePause(ActionEvent event){
-        mediaplayer.pause();
-    }
-    @FXML
-    private void handleFast(ActionEvent event){
-       mediaplayer.setRate(1.5);
-    }
-     @FXML
-    private void handleSlow(ActionEvent event){
-         mediaplayer.setRate(0.5);
-    }
-    @FXML
-    private void handleExit(ActionEvent event){
-        mediaplayer.dispose();
-    }
-    @FXML
-    private void handlePlay(ActionEvent event){
-        mediaplayer.play();
-        mediaplayer.setRate(1);
-    }
-     @FXML
-    private void handleStop(ActionEvent event){
-       System.exit(0);
-    }
-  
-    @FXML
-    private void handleCut(ActionEvent event){
-        tSliderEnd.setVisible(true);
-        trim.setVisible(true);
-        System.out.println(tSlider.getValue());
-     
-     };
-                
-    
-     @FXML
-    private void handleTrim(ActionEvent event){
-       int trimEnd = (int) tSlider.getValue();
-       int mediaEnd = (int)mediaplayer.getStopTime().toSeconds();
-       int trimStart = (int) tSliderEnd.getValue();
+   // Handels the dragable feature implemented in the effectStack
+   private void makeDraggable(Node node){
+       node.setOnMouseClicked(e->{
+           startX = e.getSceneX() - node.getTranslateX();
+           startY = e.getSceneY() - node.getTranslateY();
+           
+       });
        
-       //Duration xs = Duration.hours(trimEnd);
-       
-//        String videoPath = "C:\\Users\\SWL\\Downloads\\Documents\\output.mp4";
-        String check[] = {"cmd" , "/c", "start", "ffmpeg","-ss",trimStart+"","-t",trimEnd+"","-i",file.getAbsolutePath(),"-acodec","copy"
-        ,"-vcodec","copy","assets\\video\\cut.mp4"};
-        if(trimStart == 0){
-            String upper[] = {"cmd" , "/c", "start", "ffmpeg","-ss",trimEnd+"","-t",mediaEnd+"","-i",file.getAbsolutePath(),"-acodec","copy"
-        ,"-vcodec","copy","assets\\video\\lower.mp4"};
-        }else if(trimEnd == mediaEnd){
-            String lower[] = {"cmd" , "/c", "start", "ffmpeg","-ss",0+"","-t",trimStart+"","-i",file.getAbsolutePath(),"-acodec","copy"
-        ,"-vcodec","copy","assets\\video\\lower.mp4"};
-        }else{
-            String lower[] = {"cmd" , "/c", "start", "ffmpeg","-ss",0+"","-t",trimStart+"","-i",file.getAbsolutePath(),"-acodec","copy"
-        ,"-vcodec","copy","assets\\video\\lower.mp4"};
-            String upper[] = {"cmd" , "/c", "start", "ffmpeg","-ss",trimEnd+"","-t",mediaEnd+"","-i",file.getAbsolutePath(),"-acodec","copy"
-        ,"-vcodec","copy","assets\\video\\upper.mp4"};
-           try {
-               Process cutUpper = Runtime.getRuntime().exec(upper);
-               Process cut = Runtime.getRuntime().exec(check);
-               Process cutLower = Runtime.getRuntime().exec(lower);
-           } catch (IOException ex) {
-               Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
-           }
-            
-        }
-       // System.out.println(check);
-        
-//        try {
-//            Process cut = Runtime.getRuntime().exec(check);
-//            for (String check1 : check) {
-//                System.out.print(check1 + " ");
-//            }
-//        } catch (IOException ex) {
-//            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-       
-       
-       
-//       List<Node> effects = new ArrayList<>();
-//       System.out.println("The cut is going to be from :" +trimStart + " - " + trimEnd );
-//        // System.out.println(effectStack.getChildren());
-//         for (Node effect : effectStack.getChildren()) {
-//             effects.add(effect);
-//         }
-//         effectView.getChildren().clear();
-//         effectView.getChildren().addAll(effects);
-             //System.out.println(effect.getProperties());
-           //  effectView.getChildren().add(effectStack.getChildren().get(0));
-      // Button b = new Button("hello");
-      ////
-      // effectView.getChildren().addAll(new Button("hello"),new Button("x"));
-        // }
-       mediaplayer.dispose();
-//         for (int i = 0; i < 2; i++) {
-            Media media = new Media("assets\\video\\lower.mp4");
-            mediaplayer = new MediaPlayer(media);
-            mediaview = new MediaView(mediaplayer);
-            mediaplayer.play();
-            
-         
-        tSliderEnd.setVisible(false);
-        trim.setVisible(false);
-    }
-
-   
-   
+       node.setOnMouseDragged(e->{
+           node.setTranslateX(e.getSceneX() - startX);
+           node.setTranslateY(e.getSceneY() - startY);
+       });
+   }
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         tSliderEnd.setVisible(false);
