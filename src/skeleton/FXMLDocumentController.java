@@ -27,8 +27,11 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -43,6 +46,8 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -57,7 +62,7 @@ public class FXMLDocumentController implements Initializable {
     boolean playing = false;
     private InvalidationListener listener;
     private File file;
-    
+     public  Node selectedNode;
     
     private String filepath;
     // TimeLine Slider
@@ -81,10 +86,23 @@ public class FXMLDocumentController implements Initializable {
     private Label label;
     @FXML
     private Pane editPane;
+    
 //    @FXML
 //    private Button button;
     @FXML
+    TextField fontSizeChange;
+    @FXML
     private MediaView mediaview;
+    
+    @FXML
+    private Button change;
+    @FXML
+    private ColorPicker textForegroundColor;
+    @FXML
+    private ColorPicker textBackgroundColor;
+    @FXML
+    private TextField fontFamily;
+    
     @FXML
     private void handleButtonAction(ActionEvent event) throws IOException {
         
@@ -149,19 +167,20 @@ public class FXMLDocumentController implements Initializable {
          
      };
     // selected node for the stack tree
-    private Node c;
+   
     // Loads up the text edit panel on the editpane at home
      @FXML
      private void textEdit(ActionEvent event){
         try {
             Pane pane = FXMLLoader.load(getClass().getResource("editEffectWindow.fxml"));
             editPane.getChildren().setAll(pane);
+           
             // Iterate over the widgets in the effect stack to select the widget that was clicked
-            for (Node x : effectStack.getChildren()) {
-                if(c.equals(x)){
-                    c.setVisible(false);
-                }
-            }
+//            for (Node x : effectStack.getChildren()) {
+//                if(selectedNode.equals(x)){
+//                    selectedNode.setVisible(false);
+//                }
+//            }
         } catch (IOException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -183,7 +202,7 @@ public class FXMLDocumentController implements Initializable {
         tSliderEnd.setVisible(false);
         trim.setVisible(false);
     }
-    
+
     @FXML
     private void addOverlay(ActionEvent event){
         Label x = new Label("kindness !");
@@ -206,23 +225,45 @@ public class FXMLDocumentController implements Initializable {
     }
     @FXML
     private void updateEffectTree(ActionEvent event){
+         
         effectTreeView.getChildren().removeAll();
         for (Node node : effectStack.getChildren()) {
-          //  effectTree.getChildrenUnmodifiable().add(node);
-            System.out.println(node.toString());
-            Button dummy  = new Button(node.toString());
-            dummy.setOnAction(new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
-                    //Make selected node global
-                    c = node;
-                    textEdit(event);
-                }
-            });
+           System.out.println(node.toString());
+           Button dummy  = new Button(node.toString());
+           dummy.setOnAction((ActionEvent event1) -> {
+              selectedNode = node;
+              fontSizeChange.setText("20");
+           });
+//            for (Node newer : effectStack.getChildren()) {
+//                if(!node.equals(newer)){
+//                    
+//                }
+//            }
             effectTreeView.getChildren().add(dummy);
         }
+          
     }
+   
+    @FXML
+    private void applyChange(ActionEvent event){
+         System.out.println(selectedNode);
+         System.out.println("you clicked me");
+         
+       //
+//        System.out.println(selectedNode)System.out.println(fontSizeChange.getText() );
+//       selectedNode.setStyle("-fx-font-size: " + fontSizeChange.getText()+"; "
+//       +"-fx-text-fill: " + toRGBCode(textForegroundColor.getValue())+";");
+////       selectedNode.setStyle("-fx-text-fill: " + toRGBCode(textForegroundColor.getValue()));
+//       selectedNode.setStyle("-fx-background-color: " + toRGBCode(textBackgroundColor.getValue()));
+         selectedNode.setStyle(
+                " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue())+" ; "+ 
+                " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; " +
+                " -fx-font-size: " + fontSizeChange.getText()+" ; "+
+                " -fx-font-family : " + fontFamily.getText() + " ; " );
+         
+     
+    }
+   
     //Used for storing the difference between the node and the mouse pointer
     private double startX;
     private double startY;
@@ -252,14 +293,9 @@ public class FXMLDocumentController implements Initializable {
             });
             
             // This two lets the video be seeked through the tSlider
-            tSlider.setOnMouseDragged(new EventHandler<MouseEvent>(){
-
-                @Override
-                public void handle(MouseEvent event) {
-                    mediaplayer.seek(Duration.seconds(tSlider.getValue()));
-                }
-                
-            });
+            tSlider.setOnMouseDragged((MouseEvent event) -> {
+                mediaplayer.seek(Duration.seconds(tSlider.getValue()));
+        });
             
          
             tSlider.setOnMousePressed(new EventHandler<MouseEvent>(){
@@ -298,10 +334,18 @@ public class FXMLDocumentController implements Initializable {
            node.setTranslateY(e.getSceneY() - startY);
        });
    }
-    @Override
+
+     public static String toRGBCode( Color color )
+    {
+        return String.format( "#%02X%02X%02X",
+            (int)( color.getRed() * 255 ),
+            (int)( color.getGreen() * 255 ),
+            (int)( color.getBlue() * 255 ) );
+    }
+   @Override
     public void initialize(URL url, ResourceBundle rb) {
-        tSliderEnd.setVisible(false);
-        trim.setVisible(false);
+//        tSliderEnd.setVisible(false);
+//        trim.setVisible(false);
         
     }     
     
