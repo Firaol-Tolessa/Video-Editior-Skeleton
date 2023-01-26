@@ -27,7 +27,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
@@ -51,6 +54,8 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 /**
  *
@@ -66,6 +71,8 @@ public class FXMLDocumentController implements Initializable {
     
     private String filepath;
     // TimeLine Slider
+    @FXML
+    private AnchorPane videoContainer;
     @FXML
     private Slider tSlider;
     @FXML
@@ -86,11 +93,13 @@ public class FXMLDocumentController implements Initializable {
     private Label label;
     @FXML
     private Pane editPane;
-    
+    @FXML
+    private CheckBox boldCheck;
+    @FXML
+    private CheckBox italicCheck;
 //    @FXML
 //    private Button button;
-    @FXML
-    TextField fontSizeChange;
+ 
     @FXML
     private MediaView mediaview;
     
@@ -100,8 +109,15 @@ public class FXMLDocumentController implements Initializable {
     private ColorPicker textForegroundColor;
     @FXML
     private ColorPicker textBackgroundColor;
+   
     @FXML
-    private TextField fontFamily;
+    private TextField textChange;
+    @FXML
+    private ChoiceBox fontFamilies;
+    @FXML
+    private ChoiceBox fontSize;
+    
+    
     
     @FXML
     private void handleButtonAction(ActionEvent event) throws IOException {
@@ -203,13 +219,12 @@ public class FXMLDocumentController implements Initializable {
         trim.setVisible(false);
     }
 
+    // Add a movable overlay text
     @FXML
     private void addOverlay(ActionEvent event){
-        Label x = new Label("kindness !");
+        Label x = new Label(" T e x t ");
         Pane pane = new Pane();
-        pane.setMaxHeight(20);
-        pane.setMaxWidth(20);
-        pane.setBackground(Background.EMPTY);
+       
         pane.getChildren().add(x);
         x.setOnMouseDragged(new EventHandler<MouseEvent>(){
 
@@ -222,47 +237,73 @@ public class FXMLDocumentController implements Initializable {
         });
         effectStack.getChildren().add(x);
         effectStack.getChildren().forEach(this::makeDraggable);
+        Save change = new Save();
+        try {
+            change.writer("Label", x.getText(), 0);
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransformerException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
+    
+    // Display all the nodes that are added in Video Player
     @FXML
     private void updateEffectTree(ActionEvent event){
-         
-        effectTreeView.getChildren().removeAll();
+         //Clear already existing nodes in the VBOX for refresh functionality
+        effectTreeView.getChildren().clear();
+        
         for (Node node : effectStack.getChildren()) {
-           System.out.println(node.toString());
+         ;
            Button dummy  = new Button(node.toString());
-           dummy.setOnAction((ActionEvent event1) -> {
-              selectedNode = node;
-              fontSizeChange.setText("20");
+           
+           if(!node.equals(videoContainer)){
+               dummy.setOnAction((ActionEvent event1) -> {     
+                    selectedNode = node;  
+                    editPane.setVisible(true);
            });
-//            for (Node newer : effectStack.getChildren()) {
-//                if(!node.equals(newer)){
-//                    
-//                }
-//            }
-            effectTreeView.getChildren().add(dummy);
+               effectTreeView.getChildren().add(dummy);
+           }               
         }
           
     }
    
+    
     @FXML
     private void applyChange(ActionEvent event){
          System.out.println(selectedNode);
-         System.out.println("you clicked me");
          
-       //
-//        System.out.println(selectedNode)System.out.println(fontSizeChange.getText() );
-//       selectedNode.setStyle("-fx-font-size: " + fontSizeChange.getText()+"; "
-//       +"-fx-text-fill: " + toRGBCode(textForegroundColor.getValue())+";");
-////       selectedNode.setStyle("-fx-text-fill: " + toRGBCode(textForegroundColor.getValue()));
-//       selectedNode.setStyle("-fx-background-color: " + toRGBCode(textBackgroundColor.getValue()));
-         selectedNode.setStyle(
+         //Change the selected nod to a type of Lable to change the text
+         Label text = (Label)selectedNode;
+         text.setText(textChange.getText());
+         
+         String command = "";
+         
+         // Check the values that are inputed in the editPane
+         
+         command += 
                 " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue())+" ; "+ 
                 " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; " +
-                " -fx-font-size: " + fontSizeChange.getText()+" ; "+
-                " -fx-font-family : " + fontFamily.getText() + " ; " );
+                " -fx-font-size: " + fontSize.getValue()+" ; "+
+                " -fx-font-family : " + fontFamilies.getValue()+ " ; " ;
+         
+         
+         if(boldCheck.isSelected()){
+              command += " -fx-font-weight: bold; ";
+         }else if(italicCheck.isSelected()){
+             command += " -fx-font-style : italic ;";
+         }else if(boldCheck.isSelected() && italicCheck.isSelected()){
+              command += " -fx-font-weight: bold; ";
+              command += " -fx-font-style : italic ;";
+         }
+         
+         //Style the selected node using that setting   
+         selectedNode.setStyle(command);
          
      
     }
+    
+
    
     //Used for storing the difference between the node and the mouse pointer
     private double startX;
@@ -344,9 +385,19 @@ public class FXMLDocumentController implements Initializable {
     }
    @Override
     public void initialize(URL url, ResourceBundle rb) {
-//        tSliderEnd.setVisible(false);
-//        trim.setVisible(false);
         
+        //Setting the mood :)
+        tSliderEnd.setVisible(false);
+        trim.setVisible(false);
+        editPane.setVisible(false);
+        
+        //Initializing the text editing window parameters
+        String [] fonts = {"Arial","Monospace","Sans"};
+        String [] fontSizes = {"10","15","30","40","50"};
+        
+        fontSize.getItems().addAll(fontSizes);
+        //initalize Font Families
+        fontFamilies.getItems().addAll(fonts);
     }     
     
 }
