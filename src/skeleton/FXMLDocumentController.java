@@ -5,12 +5,17 @@
  */
 package skeleton;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.InvalidationListener;
@@ -50,6 +55,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -116,21 +122,27 @@ public class FXMLDocumentController implements Initializable {
     private ChoiceBox fontFamilies;
     @FXML
     private ChoiceBox fontSize;
-    
-    
-    
     @FXML
-    private void handleButtonAction(ActionEvent event) throws IOException {
-        
-        FileChooser chooser = new FileChooser();
+    private HBox videoTimeLine;
+    
+    
+    public File fileChooser(){
+           FileChooser chooser = new FileChooser();
         //This is used to filter the extentions
         FileChooser.ExtensionFilter filter  =  new FileChooser.ExtensionFilter("sth", "*.mp4");
         chooser.getExtensionFilters().add(filter);
         file = chooser.showOpenDialog(null);
         filepath = file.toURI().toString();
         
-        if (file != null) {
-            
+        return file;
+    }
+    
+    @FXML
+    private void handleButtonAction(ActionEvent event) throws IOException {
+        addVideo(event);
+      //  fileChooser();
+        if (file != null) {  
+           
             videoSetup();
      
 //            try {
@@ -303,19 +315,64 @@ public class FXMLDocumentController implements Initializable {
      
     }
     
+    @FXML
+    private void addVideo(ActionEvent event){
+        BufferedWriter os = null;
+        try {
+                
+            fileChooser();
+        
+            File mergeFile  = new File("mergeVideos.txt");
+            os = new BufferedWriter(new FileWriter(mergeFile ,true));
+            
+            System.out.println("Number of lines : " + countLine(mergeFile));
+            if(countLine(mergeFile)<1){
+                os.write("file " + filepath.replaceAll("file:/", ""));
+                os.close();
+                videoSetup();
+            }else if(countLine(mergeFile)>=1){
+                 System.out.println("Merged");
+                os.newLine();
+                os.write("file " + filepath.replaceAll("file:/", ""));
+                os.close();
+                filepath = Trim.Merge("mergeVideos.txt").toURI().toString();
+                videoSetup();
+               
+            }
+            
 
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        
+    }
    
+    
+    @FXML
+    private void loadMerged(ActionEvent event){
+        videoSetup();
+    }
     //Used for storing the difference between the node and the mouse pointer
     private double startX;
     private double startY;
     
     // Handels the video loading and controls
     private void videoSetup(){
+        
+        Color[] colors = {Color.RED, Color.BISQUE, Color.BLUEVIOLET};
+         int rand = (int) (Math.random()*3);
+         
+         Rectangle block = new Rectangle(videoTimeLine.getWidth()/2, videoTimeLine.getHeight());
+         block.setFill(colors[rand]);
+         videoTimeLine.getChildren().add(block);
+            
+            
+         System.out.println("Added video :" + filepath);
         if (mediaplayer != null) {
             mediaplayer.dispose();
-        }else{
-            System.out.println("Added video :" + filepath);
         }
+           
+        
          //  mediaplayer.dispose();
            media = new Media(filepath);
            // Instantiate a mediaplayer on the media
@@ -375,7 +432,19 @@ public class FXMLDocumentController implements Initializable {
            node.setTranslateY(e.getSceneY() - startY);
        });
    }
+   
+   
+     public static int countLine(File fileName) {
 
+      int lines = 0;
+      try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+          while (reader.readLine() != null) lines++;
+      } catch (IOException e) {
+          e.printStackTrace();
+      }
+      return lines;
+
+  }
      public static String toRGBCode( Color color )
     {
         return String.format( "#%02X%02X%02X",
@@ -398,6 +467,9 @@ public class FXMLDocumentController implements Initializable {
         fontSize.getItems().addAll(fontSizes);
         //initalize Font Families
         fontFamilies.getItems().addAll(fonts);
+        
+        //Delete previous states
+      
     }     
     
 }

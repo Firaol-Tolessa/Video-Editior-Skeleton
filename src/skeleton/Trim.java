@@ -39,7 +39,7 @@ public class Trim {
         
     }
     
-    public File Merge(String lower , String upper){
+    public static File Merge(String lower , String upper){
         try {
             File mergeFile = new File("merge.txt");
             BufferedWriter outStream = new BufferedWriter( new FileWriter(mergeFile));
@@ -59,9 +59,23 @@ public class Trim {
             Logger.getLogger(Trim.class.getName()).log(Level.SEVERE, null, ex);
         }
         File output = new File("assets\\video\\output.mp4");
-        for (int i = 0; i < 1000; i++) {
-            
-        }
+      
         return output;
     }
+    
+     public static File Merge(String mergeFile){
+         String command[] = {"cmd" , "/c", "start", "ffmpeg","-f","concat","-safe","0","-i",mergeFile,"-c","copy","assets/video/merged.mp4"};
+       
+      
+         try {
+            Process merge = Runtime.getRuntime().exec(command);
+//            while(merge.isAlive()){
+//                System.out.println("In progressss .....");
+//            }
+        } catch (IOException ex) {
+            Logger.getLogger(Trim.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return new File("assets\\video\\merged.mp4");
+     }
+    
 }
