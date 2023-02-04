@@ -29,6 +29,7 @@
                                        <children>
                                           <Button layoutX="19.0" layoutY="43.0" mnemonicParsing="false" onAction="#addOverlay" prefHeight="63.0" prefWidth="96.0" text="ADD" />
                                           <Button layoutX="160.0" layoutY="228.0" mnemonicParsing="false" prefHeight="73.0" prefWidth="88.0" text="Button" />
+                                          <Button layoutX="204.0" layoutY="94.0" mnemonicParsing="false" onAction="#test" prefHeight="73.0" prefWidth="88.0" text="save" />
                                        </children>
                                     </Pane>
                                     <Pane fx:id="editPane" prefHeight="253.0" prefWidth="215.0">
@@ -106,8 +107,6 @@
                                  </children>
                               </Pane>
                               <Button layoutX="268.0" layoutY="40.0" mnemonicParsing="false" onAction="#updateEffectTree" prefHeight="25.0" prefWidth="59.0" text="Button" />
-                              <Button layoutX="279.0" layoutY="89.0" mnemonicParsing="false" onAction="#addVideo" text="AddVideo" />
-                              <Button layoutX="279.0" layoutY="114.0" mnemonicParsing="false" onAction="#loadMerged" text="Load" />
                            </children>
                         </Pane>
                         <VBox prefHeight="239.0" prefWidth="927.0">
@@ -138,7 +137,7 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
+              <MenuItem mnemonicParsing="false" text="Save" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Edit">

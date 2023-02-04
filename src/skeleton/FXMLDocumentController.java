@@ -13,7 +13,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -60,20 +62,37 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 /**
  *
  * @author SWL
  */
-public class FXMLDocumentController implements Initializable {
+public class FXMLDocumentController implements Initializable,Runnable {
     private  MediaPlayer mediaplayer;
     private Media media;
     boolean playing = false;
     private InvalidationListener listener;
     private File file;
-     public  Node selectedNode;
+    public  Node selectedNode;
+    Map<Node, Effect> nodes = new HashMap<Node, Effect>();
+    
+    Effect effect; 
     
     private String filepath;
     // TimeLine Slider
@@ -139,10 +158,14 @@ public class FXMLDocumentController implements Initializable {
     
     @FXML
     private void handleButtonAction(ActionEvent event) throws IOException {
-        addVideo(event);
-      //  fileChooser();
+          
+        
+        file = fileChooser();
+          
         if (file != null) {  
-           
+            
+            
+            
             videoSetup();
      
 //            try {
@@ -235,9 +258,12 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private void addOverlay(ActionEvent event){
         Label x = new Label(" T e x t ");
-        Pane pane = new Pane();
+
+     
+        nodes.put(x, new Effect(x, "0", "5"));
        
-        pane.getChildren().add(x);
+      
+        
         x.setOnMouseDragged(new EventHandler<MouseEvent>(){
 
             @Override
@@ -315,38 +341,6 @@ public class FXMLDocumentController implements Initializable {
      
     }
     
-    @FXML
-    private void addVideo(ActionEvent event){
-        BufferedWriter os = null;
-        try {
-                
-            fileChooser();
-        
-            File mergeFile  = new File("mergeVideos.txt");
-            os = new BufferedWriter(new FileWriter(mergeFile ,true));
-            
-            System.out.println("Number of lines : " + countLine(mergeFile));
-            if(countLine(mergeFile)<1){
-                os.write("file " + filepath.replaceAll("file:/", ""));
-                os.close();
-                videoSetup();
-            }else if(countLine(mergeFile)>=1){
-                 System.out.println("Merged");
-                os.newLine();
-                os.write("file " + filepath.replaceAll("file:/", ""));
-                os.close();
-                filepath = Trim.Merge("mergeVideos.txt").toURI().toString();
-                videoSetup();
-               
-            }
-            
-
-        } catch (IOException ex) {
-            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        
-    }
-   
     
     @FXML
     private void loadMerged(ActionEvent event){
@@ -355,14 +349,62 @@ public class FXMLDocumentController implements Initializable {
     //Used for storing the difference between the node and the mouse pointer
     private double startX;
     private double startY;
+    @FXML
+    public void test() throws SAXException, IOException, ParserConfigurationException, TransformerConfigurationException, TransformerException{
+      save("video");
+    }
+    
+    private void save(String elementType ){
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docbuilder = dbFactory.newDocumentBuilder();
+          //  Document doc = docbuilder.parse(new File("staff-dom.txt"));
+            Document doc = docbuilder.newDocument();
+            Element root = doc.createElement("Video");
+            
+                Element video = doc.createElement("Video");
+                Text path = doc.createTextNode(filepath);
+                video.appendChild(path);
+                root.appendChild(video);
+           
+            doc.appendChild(root);
+            DOMSource source = new DOMSource(doc);
+             Result result  = new StreamResult(new File("staff-dom.txt"));
+             TransformerFactory ts = TransformerFactory.newInstance();
+            Transformer t = ts.newTransformer();
+            t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+            t.setOutputProperty(OutputKeys.INDENT, "yes");
+            t.transform(source, result);
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransformerException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void writeXml(DOMSource source,Result result) {
+        try {
+           
+            TransformerFactory ts = TransformerFactory.newInstance();
+            Transformer t = ts.newTransformer();
+            t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+            t.setOutputProperty(OutputKeys.INDENT, "yes");
+            t.transform(source, result);
+        } catch (TransformerConfigurationException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransformerException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     // Handels the video loading and controls
     private void videoSetup(){
+       
         
         Color[] colors = {Color.RED, Color.BISQUE, Color.BLUEVIOLET};
          int rand = (int) (Math.random()*3);
          
-         Rectangle block = new Rectangle(videoTimeLine.getWidth()/2, videoTimeLine.getHeight());
+         Rectangle block = new Rectangle(videoTimeLine.getWidth(), videoTimeLine.getHeight());
          block.setFill(colors[rand]);
          videoTimeLine.getChildren().add(block);
             
@@ -418,7 +460,10 @@ public class FXMLDocumentController implements Initializable {
             
            
             mediaplayer.play();
+//             Thread overlay = new Thread(this);
+//             overlay.start();
     }
+    
    // Handels the dragable feature implemented in the effectStack
    private void makeDraggable(Node node){
        node.setOnMouseClicked(e->{
@@ -432,7 +477,30 @@ public class FXMLDocumentController implements Initializable {
            node.setTranslateY(e.getSceneY() - startY);
        });
    }
-   
+   public String milliSecondsToTimer(long milliseconds){
+    String finalTimerString = "";
+    String secondsString = "";
+
+    // Convert total duration into time
+       int hours = (int)( milliseconds / (1000*60*60));
+       int minutes = (int)(milliseconds % (1000*60*60)) / (1000*60);
+       int seconds = (int) ((milliseconds % (1000*60*60)) % (1000*60) / 1000);
+       // Add hours if there
+       if(hours > 0){
+           finalTimerString = hours + ":";
+       }
+
+       // Prepending 0 to seconds if it is one digit
+       if(seconds < 10){ 
+           secondsString = "0" + seconds;
+       }else{
+           secondsString = "" + seconds;}
+
+       finalTimerString = finalTimerString + minutes + ":" + secondsString;
+
+    // return timer string
+    return finalTimerString;
+}
    
      public static int countLine(File fileName) {
 
@@ -471,5 +539,28 @@ public class FXMLDocumentController implements Initializable {
         //Delete previous states
       
     }     
+
+    
+    public void run() {
+        while (true) {     
+              for (Map.Entry<Node, Effect> entrySet : nodes.entrySet()) {
+                Node key = entrySet.getKey();
+                Effect value = entrySet.getValue();
+                System.out.println(key + "  " + value.getEndTime());
+                  System.out.println((int)mediaplayer.getCurrentTime().toSeconds());
+                if((int)mediaplayer.getCurrentTime().toSeconds() >= value.getEndTime()){
+                  //  key.setVisible(false);
+                    System.out.println(key.isVisible());
+                   
+                    mediaplayer.pause();
+                     
+                }
+        }
+            
+            if((int)mediaplayer.getCurrentTime().toSeconds() == 5){
+              // mediaplayer.pause();
+            }
+        }
+    }
     
 }
