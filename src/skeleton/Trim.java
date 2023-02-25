@@ -38,7 +38,7 @@ public class Trim {
         }
         
     }
-    
+   //For future project idea :) 
     public static File Merge(String lower , String upper){
         try {
             File mergeFile = new File("merge.txt");

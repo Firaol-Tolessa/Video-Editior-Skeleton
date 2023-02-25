@@ -79,10 +79,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
-/**
- *
- * @author SWL
- */
+
 public class FXMLDocumentController implements Initializable,Runnable {
     private  MediaPlayer mediaplayer;
     private Media media;
@@ -134,7 +131,8 @@ public class FXMLDocumentController implements Initializable,Runnable {
     private ColorPicker textForegroundColor;
     @FXML
     private ColorPicker textBackgroundColor;
-   
+    @FXML
+    private Pane textSelectionPane;
     @FXML
     private TextField textChange;
     @FXML
@@ -152,14 +150,12 @@ public class FXMLDocumentController implements Initializable,Runnable {
         chooser.getExtensionFilters().add(filter);
         file = chooser.showOpenDialog(null);
         filepath = file.toURI().toString();
-        
+         new Save("Video","",filepath,true);
         return file;
     }
     
     @FXML
     private void handleButtonAction(ActionEvent event) throws IOException {
-          
-        
         file = fileChooser();
           
         if (file != null) {  
@@ -246,24 +242,42 @@ public class FXMLDocumentController implements Initializable,Runnable {
        Trim edit = new Trim();
        // Cut the video according to the start time and endTime
        edit.Cut(media,file, trimStart, trimEnd);
-       filepath = edit.Merge("lower.mp4", "upper.mp4").toURI().toString();
+       mediaplayer.dispose();
+      // filepath = edit.Merge("lower.mp4", "upper.mp4").toURI().toString();
+       
+       /**
+        * change the path to absolute and dynamic
+       *///
+       
+       filepath = "file:/C:/Users/SWL/Documents/NetBeansProjects/Skeleton/assets/video/cut.mp4";
+       new Save("Cut", trimStart+"", trimEnd+"", true);
+       while(!new File("C:\\Users\\SWL\\Documents\\NetBeansProjects\\Skeleton\\assets\\video\\cut.mp4").exists()){
+           System.out.println("Waiting");
+       }
+       
        videoSetup();
+         removeFiles("assets/video");
      
-         
         tSliderEnd.setVisible(false);
         trim.setVisible(false);
     }
-
+    
+    public void removeFiles(String path){
+           for (File file : new File(path).listFiles()) {
+           file.delete();
+       }
+    }
+   
+     @FXML
+    private void displayTextSelection(ActionEvent event){
+        textSelectionPane.setVisible(true);
+    }
+   
     // Add a movable overlay text
-    @FXML
+    @FXML   
     private void addOverlay(ActionEvent event){
         Label x = new Label(" T e x t ");
-
-     
         nodes.put(x, new Effect(x, "0", "5"));
-       
-      
-        
         x.setOnMouseDragged(new EventHandler<MouseEvent>(){
 
             @Override
@@ -275,14 +289,7 @@ public class FXMLDocumentController implements Initializable,Runnable {
         });
         effectStack.getChildren().add(x);
         effectStack.getChildren().forEach(this::makeDraggable);
-        Save change = new Save();
-        try {
-            change.writer("Label", x.getText(), 0);
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (TransformerException ex) {
-            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
     }
     
     // Display all the nodes that are added in Video Player
@@ -337,7 +344,8 @@ public class FXMLDocumentController implements Initializable,Runnable {
          
          //Style the selected node using that setting   
          selectedNode.setStyle(command);
-         
+        
+         new Save("Text",textChange.getText(),command , true);
      
     }
     
@@ -412,6 +420,7 @@ public class FXMLDocumentController implements Initializable,Runnable {
          System.out.println("Added video :" + filepath);
         if (mediaplayer != null) {
             mediaplayer.dispose();
+            mediaplayer.stop();
         }
            
         
@@ -460,6 +469,7 @@ public class FXMLDocumentController implements Initializable,Runnable {
             
            
             mediaplayer.play();
+            
 //             Thread overlay = new Thread(this);
 //             overlay.start();
     }
@@ -522,12 +532,16 @@ public class FXMLDocumentController implements Initializable,Runnable {
     }
    @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+        removeFiles("assets/video");
         //Setting the mood :)
+        if(new File("temp-save.xml").exists()){
+        new File("temp-save.xml").delete();
+        }
+       
         tSliderEnd.setVisible(false);
         trim.setVisible(false);
         editPane.setVisible(false);
-        
+        textSelectionPane.setVisible(false);
         //Initializing the text editing window parameters
         String [] fonts = {"Arial","Monospace","Sans"};
         String [] fontSizes = {"10","15","30","40","50"};
