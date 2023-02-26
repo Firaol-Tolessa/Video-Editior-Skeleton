@@ -7,11 +7,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.media.Media;
 
 
-
 public class Trim {
+
     public void Cut(Media media, File file , double trimStart , double trimEnd){
         int mediaEnd = (int)media.getDuration().toSeconds();
         String check[] = {"cmd" , "/c", "start", "ffmpeg","-ss",trimStart+"","-t",trimEnd+"","-i",file.getAbsolutePath(),"-acodec","copy"
@@ -29,16 +31,22 @@ public class Trim {
         ,"-vcodec","copy","assets\\video\\upper.mp4"};
            try {
                Process cutUpper = Runtime.getRuntime().exec(upper);
+    
                Process cut = Runtime.getRuntime().exec(check);
                Process cutLower = Runtime.getRuntime().exec(lower);
+              
+               
            } catch (IOException ex) {
-               Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+              // Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+               System.err.println(ex.getMessage());
            }
            
         }
         
     }
    //For future project idea :) 
+    
+    
     public static File Merge(String lower , String upper){
         try {
             File mergeFile = new File("merge.txt");
