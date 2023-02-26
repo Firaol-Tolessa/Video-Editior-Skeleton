@@ -64,6 +64,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -152,7 +153,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
         chooser.getExtensionFilters().add(filter);
         file = chooser.showOpenDialog(null);
         filepath = file.toURI().toString();
-        new Save("Video", "", filepath, true);
+        new Save("Video", "UNCUT", file.getAbsolutePath(), true);
         return file;
     }
 
@@ -243,39 +244,47 @@ public class FXMLDocumentController implements Initializable, Runnable {
 
     @FXML
     private void handleTrim(ActionEvent event) {
-        int trimEnd = (int) tSlider.getValue();
-        int mediaEnd = (int) mediaplayer.getStopTime().toSeconds();
-        int trimStart = (int) tSliderEnd.getValue();
+        try {
+            int trimEnd = (int) tSlider.getValue();
+            int mediaEnd = (int) mediaplayer.getStopTime().toSeconds();
+            int trimStart = (int) tSliderEnd.getValue();
 
-        Trim edit = new Trim();
-        // Cut the video according to the start time and endTime
-        System.out.println("Cutting : " + file.getName() + "From :" + trimStart + "Upto :" + trimEnd);
+            Trim edit = new Trim();
+            // Cut the video according to the start time and endTime
+            System.out.println("Cutting : " + file.getName() + "From :" + trimStart + "Upto :" + trimEnd);
 
-        if (new File("C:\\Users\\SWL\\Documents\\NetBeansProjects\\Skeleton\\assets\\video\\cut.mp4").exists()) {
-            System.out.println("/n Disposed of cut.mp4 /n");
-            mediaplayer.dispose();
-            new File("asset/video/cut.mp4").delete();
+//            if (new File("C:\\Users\\SWL\\Documents\\NetBeansProjects\\Skeleton\\assets\\video\\cut.mp4").exists()) {
+//                System.out.println("/n Disposed of cut.mp4 /n");
+//                mediaplayer.dispose();
+//                new File("asset/video/cut.mp4").delete();
+//            }
+            file = edit.Cut(media, file, trimStart, trimEnd);
+            filepath = file.toURI().toString();
+            System.out.println("Cutted file  :" + filepath);
+            // filepath = edit.Merge("lower.mp4", "upper.mp4").toURI().toString();
+
+            /**
+             * change the path to absolute and dynamic
+             *///
+//            filepath = "file:/C:/Users/SWL/Documents/NetBeansProjects/Skeleton/assets/video/cut.mp4";
+//            file = new File("C:\\Users\\SWL\\Documents\\NetBeansProjects\\Skeleton\\assets\\video\\cut.mp4");
+            //  new Save("Cut", trimStart + "", trimEnd + "", true);
+//            while (!new File("C:\\Users\\SWL\\Documents\\NetBeansProjects\\Skeleton\\assets\\video\\cut.mp4").exists()) {
+//                // System.out.println("Waiting");
+//                status.setText("Processing .... ");
+//            }
+            Thread.sleep(2000);
+
+            new Save("Video", "CUT", file.getAbsolutePath() + "", true);
+            videoSetup();
+            reload(event);
+            // removeFiles("assets/video");
+
+            tSliderEnd.setVisible(false);
+            trim.setVisible(false);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        edit.Cut(media, file, trimStart, trimEnd);
-//       
-        // filepath = edit.Merge("lower.mp4", "upper.mp4").toURI().toString();
-
-        /**
-         * change the path to absolute and dynamic
-         *///
-        filepath = "file:/C:/Users/SWL/Documents/NetBeansProjects/Skeleton/assets/video/cut.mp4";
-        file = new File("C:\\Users\\SWL\\Documents\\NetBeansProjects\\Skeleton\\assets\\video\\cut.mp4");
-        //  new Save("Cut", trimStart + "", trimEnd + "", true);
-        while (!new File("C:\\Users\\SWL\\Documents\\NetBeansProjects\\Skeleton\\assets\\video\\cut.mp4").exists()) {
-            // System.out.println("Waiting");
-            status.setText("Processing .... ");
-        }
-
-        videoSetup();
-        removeFiles("assets/video");
-
-        tSliderEnd.setVisible(false);
-        trim.setVisible(false);
     }
 
     public void removeFiles(String path) {
@@ -303,15 +312,14 @@ public class FXMLDocumentController implements Initializable, Runnable {
             }
 
         });
-        
+
         effectStack.getChildren().add(x);
         effectStack.getChildren().forEach(this::makeDraggable);
-
+        // editPane.setVisible(true);
+        updateEffectTree();
     }
 
-    private void addElement(String text) {
-        Label x = new Label(text);
-
+    private void addElement(Node x) {
         nodes.put(x, new Effect(x, "0", "5"));
         x.setOnMouseDragged(new EventHandler<MouseEvent>() {
 
@@ -329,16 +337,16 @@ public class FXMLDocumentController implements Initializable, Runnable {
     }
 
     // Display all the nodes that are added in Video Player
-    @FXML
-    private void updateEffectTree(ActionEvent event) {
+    private void updateEffectTree() {
         //Clear already existing nodes in the VBOX for refresh functionality
-        effectTreeView.getChildren().clear();
+        // effectTreeView.getChildren().clear();
 
         for (Node node : effectStack.getChildren()) {
 
-            Button dummy = new Button(node.toString());
-
             if (!node.equals(videoContainer)) {
+                Label x = (Label) node;
+                Button dummy = new Button(x.getText());
+                //
                 dummy.setOnAction((ActionEvent event1) -> {
                     selectedNode = node;
                     editPane.setVisible(true);
@@ -350,7 +358,11 @@ public class FXMLDocumentController implements Initializable, Runnable {
     }
 
     @FXML
-    private void openProject() {
+    private void openProject(ActionEvent event) {
+//        effectTreeView.getChildren().remove(0, effectStack.getChildren().size());
+
+        effectStack.getChildren().removeAll(effectStack.getChildren());
+
         File tempSaveFile = new File("temp-save.xml");
         try {
             if (tempSaveFile.exists()) {
@@ -359,21 +371,24 @@ public class FXMLDocumentController implements Initializable, Runnable {
                 Document doc = docBuilder.parse(tempSaveFile);
                 Element rootElement = (Element) doc.getElementsByTagName("Video").item(0);
                 // the video path
-                System.out.println(rootElement.getAttribute("Path"));
+                // System.out.println(rootElement.getAttribute("Path"));
                 filepath = rootElement.getAttribute("Path");
+                filepath = new File(filepath).toURI().toString();
                 videoSetup();
                 //
-                NodeList nodeList = rootElement.getElementsByTagName("*");
+                NodeList nodeList = rootElement.getElementsByTagName("Text");
+                System.out.println("Node List Length = " + nodeList.getLength());
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     Element node = (Element) nodeList.item(i);
                     if (node.getNodeName() == "Text") {
                         //Get text node 
-                        addElement(node.getAttribute("text"));
-                        System.out.println(node.getAttribute("text"));
+                        //addElement(node.getAttribute("text"));
+                        // System.out.println(node.getAttribute("text"));
                         //prints out the value / command
                         effects.add(node.getElementsByTagName("Value").item(0).getTextContent());
-                        load(node.getElementsByTagName("Value").item(0).getTextContent());
-                        System.out.println(node.getElementsByTagName("Value").item(0).getTextContent());
+                        load(node.getAttribute("text"), node.getElementsByTagName("Value").item(0).getTextContent());
+                        Label temp = new Label(node.getAttribute("text"));
+                        //  System.out.println(node.getElementsByTagName("Value").item(0).getTextContent());
                     }
                 }
 
@@ -387,22 +402,21 @@ public class FXMLDocumentController implements Initializable, Runnable {
         }
 
     }
-    
-    
+
     /**
      * **
-     * This locates the nod in ral time
-     * assigne he valus to export funciton
+     * This locates the nod in ral time assigne he valus to export funciton
      */
     @FXML
-    private void positionOfEffects(ActionEvent event){
+    private void positionOfEffects(ActionEvent event) {
         System.out.println("");
         for (Node node : effectStack.getChildren()) {
-           
+
             Bounds boundsInScene = node.localToParent(node.getBoundsInLocal());
-            System.out.println("X : "+boundsInScene.getMaxX()+ " : Y :" + boundsInScene.getMaxY());
+            System.out.println("X : " + boundsInScene.getMaxX() + " : Y :" + boundsInScene.getMaxY());
         }
-    }    
+    }
+
     @FXML
     private void applyChange(ActionEvent event) {
         System.out.println(selectedNode);
@@ -412,35 +426,105 @@ public class FXMLDocumentController implements Initializable, Runnable {
         text.setText(textChange.getText());
 
         String command = "";
-
+        System.out.println("textBackgroundColor: " + textBackgroundColor.getValue()
+                + "\ntextForegroundColor: " + textForegroundColor.getValue()
+                + "\nfontSize: " + fontSize.getValue()
+                + "\nfontFamilies: " + fontFamilies.getValue());
         // Check the values that are inputed in the editPane
-        if (textBackgroundColor.getValue() == null) {
-            command += " -fx-background-color: black ; ";
-            command
-                    += " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
+        if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() == null
+                && fontSize.getValue() == null && fontFamilies.getValue() == null) {
+            command += " -fx-background-color: black ; "
+                    + " -fx-text-fill: white ; "
+                    + " -fx-font-size:30 ; "
+                    + " -fx-font-family : Arial ; ";
+
+        } else if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() == null
+                && fontSize.getValue() == null && fontFamilies.getValue() != null) {
+            command += " -fx-background-color: black ; "
+                    + " -fx-text-fill: white ; "
+                    + " -fx-font-size:30 ; "
+                    + " -fx-font-family : " + fontFamilies.getValue() + " ; ";
+        } else if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() == null
+                && fontSize.getValue() != null && fontFamilies.getValue() == null) {
+            command += " -fx-background-color: black ; "
+                    + " -fx-text-fill: white ; "
+                    + " -fx-font-size: " + fontSize.getValue() + " ; "
+                    + " -fx-font-family : Arial ; ";
+        } else if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() == null
+                && fontSize.getValue() != null && fontFamilies.getValue() != null) {
+            command += " -fx-background-color: black ; "
+                    + " -fx-text-fill: white ; "
                     + " -fx-font-size: " + fontSize.getValue() + " ; "
                     + " -fx-font-family : " + fontFamilies.getValue() + " ; ";
-        } else if (textForegroundColor.getValue() == null) {
-            command += " -fx-text-fill: black ; ";
-            command
-                    += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
+        } else if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() != null
+                && fontSize.getValue() == null && fontFamilies.getValue() == null) {
+            command += " -fx-background-color: black ; "
+                    + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
+                    + " -fx-font-size:30 ; "
+                    + " -fx-font-family : Arial ; ";
+        } else if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() != null
+                && fontSize.getValue() == null && fontFamilies.getValue() != null) {
+            command += " -fx-background-color: black ; "
+                    + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
+                    + " -fx-font-size:30 ; "
+                    + " -fx-font-family : " + fontFamilies.getValue() + " ; ";
+        } else if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() != null
+                && fontSize.getValue() != null && fontFamilies.getValue() == null) {
+            command += " -fx-background-color: black ; "
+                    + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
+                    + " -fx-font-size: " + fontSize.getValue() + " ; "
+                    + " -fx-font-family : Arial ; ";
+        } else if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() != null
+                && fontSize.getValue() != null && fontFamilies.getValue() != null) {
+            command += " -fx-background-color: black ; "
+                    + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
                     + " -fx-font-size: " + fontSize.getValue() + " ; "
                     + " -fx-font-family : " + fontFamilies.getValue() + " ; ";
-        } else if (fontSize.getValue() == null) {
-            command += " -fx-font-size:30 ; ";
-            command
-                    += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
-                    + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
+        } else if (textBackgroundColor.getValue() != null && textForegroundColor.getValue() == null
+                && fontSize.getValue() == null && fontFamilies.getValue() == null) {
+            command += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
+                    + " -fx-text-fill: white ; "
+                    + " -fx-font-size:30 ; "
+                    + " -fx-font-family : Arial ; ";
+        } else if (textBackgroundColor.getValue() != null && textForegroundColor.getValue() == null
+                && fontSize.getValue() == null && fontFamilies.getValue() != null) {
+            command += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
+                    + " -fx-text-fill: white ; "
+                    + " -fx-font-size:30 ; "
                     + " -fx-font-family : " + fontFamilies.getValue() + " ; ";
-        } else if (fontFamilies.getValue() == null) {
-            command += " -fx-font-family : Monospace ; ";
-            command
-                    += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
+        } else if (textBackgroundColor.getValue() != null && textForegroundColor.getValue() == null
+                && fontSize.getValue() != null && fontFamilies.getValue() == null) {
+            command += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
+                    + " -fx-text-fill: white ; "
+                    + " -fx-font-size: " + fontSize.getValue() + " ; "
+                    + " -fx-font-family : Arial ; ";
+        } else if (textBackgroundColor.getValue() != null && textForegroundColor.getValue() == null
+                && fontSize.getValue() != null && fontFamilies.getValue() != null) {
+            command += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
+                    + " -fx-text-fill: white ; "
+                    + " -fx-font-size: " + fontSize.getValue() + " ; "
+                    + " -fx-font-family : " + fontFamilies.getValue() + " ; ";
+        } else if (textBackgroundColor.getValue() != null && textForegroundColor.getValue() != null
+                && fontSize.getValue() == null && fontFamilies.getValue() == null) {
+            command += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
                     + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
-                    + " -fx-font-size: " + fontSize.getValue() + " ; ";
-        } else {
-            command
-                    += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
+                    + " -fx-font-size:30 ; "
+                    + " -fx-font-family : Arial ; ";
+        } else if (textBackgroundColor.getValue() != null && textForegroundColor.getValue() != null
+                && fontSize.getValue() == null && fontFamilies.getValue() != null) {
+            command += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
+                    + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
+                    + " -fx-font-size:30 ; "
+                    + " -fx-font-family : " + fontFamilies.getValue() + " ; ";
+        } else if (textBackgroundColor.getValue() != null && textForegroundColor.getValue() != null
+                && fontSize.getValue() != null && fontFamilies.getValue() == null) {
+            command += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
+                    + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
+                    + " -fx-font-size: " + fontSize.getValue() + " ; "
+                    + " -fx-font-family : Arial ; ";
+        } else if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() == null
+                && fontSize.getValue() == null && fontFamilies.getValue() == null) {
+            command += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
                     + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
                     + " -fx-font-size: " + fontSize.getValue() + " ; "
                     + " -fx-font-family : " + fontFamilies.getValue() + " ; ";
@@ -457,44 +541,96 @@ public class FXMLDocumentController implements Initializable, Runnable {
 
         //Style the selected node using that setting   
         selectedNode.setStyle(command);
-       
+
         new Save("Text", textChange.getText(), command, true);
 
     }
+
+    // CHange teh text array to arraylist
     @FXML
-    private void Export() {
+    private void Export(ActionEvent event) {
+        File tempSaveFile = new File("temp-save.xml");
+//        ArrayList<String> texts = new ArrayList<>();
+        String[] texts = new String[20];
+        if (tempSaveFile.exists()) {
+            try {
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
+                Document doc = docBuilder.parse(tempSaveFile);
+                Element rootElement = (Element) doc.getElementsByTagName("Video").item(0);
+                // the video path
+                System.out.println(rootElement.getAttribute("Path"));
+                filepath = rootElement.getAttribute("Path");
+                //videoSetup();
+                //
+                NodeList nodeList = rootElement.getElementsByTagName("Text");
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    Element node = (Element) nodeList.item(i);
+                    if (node.getNodeName() == "Text") {
+                        //Get text node
+                        //addElement(node.getAttribute("text"));
+                        //System.out.println(node.getAttribute("text"));
+                        texts[i] = (node.getAttribute("text"));
+                        //prints out the value / command
+                        effects.add(node.getElementsByTagName("Value").item(0).getTextContent());
+                        System.out.println(node.getElementsByTagName("Value").item(0).getTextContent());
+                    }
+                }
+            } catch (ParserConfigurationException | SAXException | IOException ex) {
+                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
         try {
-            String executable="";
+            String executable = "";
             int counter2 = 0;
-            
+            //    System.out.println("Effects size : "+ effects.size() + "\n Text size  : " + texts.size());
             for (String command : effects) {
-                System.out.println(command);
+
+                // System.out.println(command);
                 String[] cmd = command.split(";");
                 String[] finalCmd = new String[7];
-                
+                Bounds boundsInScene = null;
                 int counter = 0;
-                
-                
+                System.out.println("Counter : " + counter + "Counter 2 : " + counter2);
+                System.out.println("Effect Stack tree Children number : " + effectStack.getChildren().size());
+
+                if (counter2 < 2) {
+                    Node node = effectStack.getChildren().get(counter2);
+                    boundsInScene = node.localToParent(node.getBoundsInLocal());
+
+                }
+
                 for (String sub : cmd) {
-                    System.out.println(sub);
+                    //System.out.println(sub);
                     String[] values = sub.split(":");
                     if (counter < 7 && values.length == 2) {
                         finalCmd[counter] = values[1].trim();
-                    } 
+                    } else {
+                        finalCmd[counter] = null;
+                    }
+                    // System.out.println("values "  + values);
                     counter += 1;
                 }
-                if(counter2 == 0){
-                    executable = "cmd /c start ffplay -i assets\\video\\cut.mp4 -vf \"drawtext=fontfile=c\\\\:/Windows/fonts/"
-                            +finalCmd[3] + ".ttf:text='dwdwdwerfwer':fontcolor="+ finalCmd[1]+
-                            ":fontsize=" + finalCmd[2]+
-                            ":box=1:boxcolor=" + finalCmd[0] + ":boxborderw=5:x=(w-text_w)/2:y=(h-text_h)/2\"";
-                }else{
-                    executable += ",\"drawtext=fontfile=c\\\\:/Windows/fonts/"
-                            +finalCmd[3] + ".ttf:text='dwdwdwerfwer':fontcolor="+ finalCmd[1]+
-                            ":fontsize=" + finalCmd[2]+
-                            ":box=1:boxcolor=" + finalCmd[0] + ":boxborderw=5:x=(w-text_w)/2:y=(h-text_h)/2\"";
+                if (counter2 == 0 && counter2 < 2) {
+                    executable = "cmd /c start ffplay -i " + filepath.replace('f', 'k')
+                            + " -vf \"drawtext=fontfile=c\\\\:/Windows/fonts/"
+                            + finalCmd[3] + ".ttf:" + "text="
+                            + texts[counter2] + ":fontcolor=" + finalCmd[1]
+                            + ":fontsize=" + finalCmd[2]
+                            + ":box=1:boxcolor=" + finalCmd[0]
+                            + ":boxborderw=5:x=" + boundsInScene.getMaxX()
+                            + ":y=" + boundsInScene.getMaxY() + "\"";
+                } else if (counter2 != 0 && counter2 < 2) {
+                    executable += ",drawtext=fontfile=c\\\\:/Windows/fonts/"
+                            + finalCmd[3] + ".ttf:" + "text=" + texts[counter2] + ":fontcolor=" + finalCmd[1]
+                            + ":fontsize=" + finalCmd[2]
+                            + ":box=1:boxcolor=" + finalCmd[0]
+                            + ":boxborderw=5:x=" + boundsInScene.getMaxX()
+                            + ":y=" + boundsInScene.getMaxY() + "\"";
+//                    ":boxborderw=5:x=(w-text_w)/2:y=(h-text_h)/2\""
                 }
-                 counter2 += 1;
+                counter2 += 1;
             }
             System.out.println(executable);
             Process run = Runtime.getRuntime().exec(executable);
@@ -503,10 +639,11 @@ public class FXMLDocumentController implements Initializable, Runnable {
         }
     }
 
-    private void load(String command) {
-        Label textTemp = (Label) selectedNode;
+    private void load(String text, String command) {
 
-        selectedNode.setStyle(command);
+        Label textTemp = new Label(text);
+        textTemp.setStyle(command);
+        addElement(textTemp);
     }
 
     @FXML
@@ -568,6 +705,52 @@ public class FXMLDocumentController implements Initializable, Runnable {
     @FXML
     private void reload(ActionEvent event) {
         videoSetup();
+    }
+
+    @FXML
+    private void remove(ActionEvent event) {
+        Label temp = (Label) selectedNode;
+        effectStack.getChildren().remove(selectedNode);
+        File tempSaveFile = new File("temp-save.xml");
+        if (tempSaveFile.exists()) {
+            try {
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
+                Document doc = docBuilder.parse(tempSaveFile);
+                Element rootElement = (Element) doc.getElementsByTagName("Video").item(0);
+                // the video path
+                System.out.println(rootElement.getAttribute("Path"));
+                filepath = rootElement.getAttribute("Path");
+                //videoSetup();
+                //
+                NodeList nodeList = rootElement.getElementsByTagName("Text");
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    Element node = (Element) nodeList.item(i);
+                    if (node.getNodeName() == "Text") {
+
+                        if (node.getAttribute("text").equals(temp.getText())) {
+                            System.out.println("Node Name : " + node.getAttribute("text") + " = " + temp.getText());
+                            node.getParentNode().removeChild(node);
+
+                            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                            Result out = new StreamResult(new File("temp-save.xml"));
+                            Source in = new DOMSource(doc);
+                            transformer.transform(in, out);
+//                            System.out.println(node.getParentNode().getNodeName());
+//                            System.out.println(node.getChildNodes().item(0).getNodeName());
+//                            node.removeChild(node.getChildNodes().item(0));
+                        }
+
+                    }
+                }
+            } catch (ParserConfigurationException | SAXException | IOException ex) {
+                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (TransformerException ex) {
+                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+        updateEffectTree();
     }
 
     // Handels the video loading and controls
@@ -717,7 +900,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        removeFiles("assets/video");
+        // removeFiles("assets/video");
         //Setting the mood :)
         if (new File("temp-save.xml").exists()) {
             //new File("temp-save.xml").delete();
@@ -728,7 +911,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
         editPane.setVisible(false);
         textSelectionPane.setVisible(false);
         //Initializing the text editing window parameters
-        String[] fonts = {"Arial", "Monospace", "Sans"};
+        String[] fonts = {"Arial", "MAGNETOB", "OLDENGL", "SCRIPTBL"};
         String[] fontSizes = {"10", "15", "30", "40", "50"};
 
         fontSize.getItems().addAll(fontSizes);

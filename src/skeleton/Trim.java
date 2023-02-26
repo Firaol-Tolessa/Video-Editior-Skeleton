@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
@@ -14,10 +15,22 @@ import javafx.scene.media.Media;
 
 public class Trim {
 
-    public void Cut(Media media, File file , double trimStart , double trimEnd){
+    public File Cut(Media media, File file , double trimStart , double trimEnd){
+//        File fileTobeCut = file;
+        String output;
+        Random number = new Random();
         int mediaEnd = (int)media.getDuration().toSeconds();
+//        if (new File("assets/video/"+file.hashCode()+".mp4").exists()) {
+//            fileTobeCut = new File("assets/video/"+file.hashCode()+".mp4");
+//        }
+        if(new File("assets/video/"+file+".mp4").exists()){
+            output = number.nextInt()*0.00000125+".mp4";
+        }else{
+            output = number.nextInt()*0.0000036+".mp4";
+        }
+        System.out.println("Cutting : " + file);
         String check[] = {"cmd" , "/c", "start", "ffmpeg","-ss",trimStart+"","-t",trimEnd+"","-i",file.getAbsolutePath(),"-acodec","copy"
-        ,"-vcodec","copy","assets\\video\\cut.mp4"};
+        ,"-vcodec","copy","assets\\video\\"+output};
         if(trimStart == 0){
             String upper[] = {"cmd" , "/c", "start", "ffmpeg","-ss",trimEnd+"","-t",mediaEnd+"","-i",file.getAbsolutePath(),"-acodec","copy"
         ,"-vcodec","copy","assets\\video\\lower.mp4"};
@@ -30,10 +43,10 @@ public class Trim {
             String upper[] = {"cmd" , "/c", "start", "ffmpeg","-ss",trimEnd+"","-t",mediaEnd+"","-i",file.getAbsolutePath(),"-acodec","copy"
         ,"-vcodec","copy","assets\\video\\upper.mp4"};
            try {
-               Process cutUpper = Runtime.getRuntime().exec(upper);
+              // Process cutUpper = Runtime.getRuntime().exec(upper);
     
                Process cut = Runtime.getRuntime().exec(check);
-               Process cutLower = Runtime.getRuntime().exec(lower);
+               //Process cutLower = Runtime.getRuntime().exec(lower);
               
                
            } catch (IOException ex) {
@@ -42,7 +55,9 @@ public class Trim {
            }
            
         }
-        
+        System.out.println("Ouput : " + output);
+//        System.out.println("File to be cut  : " + fileTobeCut.toURI().toString());
+        return new File("assets/video/" + output);
     }
    //For future project idea :) 
     

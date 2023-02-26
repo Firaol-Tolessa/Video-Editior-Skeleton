@@ -31,7 +31,7 @@ public class Save {
             Element rootElement = null;
             // root elements
             Document doc = null;
-            if(type == "Video" ){
+            if(type == "Video" && text == "UNCUT"){
                 if(new File("temp-save.xml").exists()){
                     //open a dialog box to ask for the user to save changes
                     new File("temp-save.xml").delete();
@@ -43,6 +43,13 @@ public class Save {
                     System.out.println("From save , save :"+rootElement);
                     doc.appendChild(rootElement);
                 }
+            }else if(type == "Video" && text == "CUT"){
+                System.out.println("YOu were here");
+                doc = docBuilder.newDocument();
+                    rootElement = doc.createElement("Video");
+                    rootElement.setAttribute("Path",command);
+                    System.out.println("From save , save :"+rootElement);
+                    doc.appendChild(rootElement);
             }
             else if(type == "Text"){
                 if(new File("temp-save.xml").exists()){

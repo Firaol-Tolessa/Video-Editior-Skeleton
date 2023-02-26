@@ -95,7 +95,6 @@
                               </BorderPane>
                               <StackPane fx:id="effectStack" focusTraversable="true" prefHeight="352.0" prefWidth="696.0">
                                  <children>
-                                    <Label text="VIDEO PLAYER" />
                                   <AnchorPane fx:id="videoContainer" minHeight="0.0" minWidth="0.0" prefHeight="314.0" prefWidth="696.0" />
                                  </children>
                               </StackPane>
@@ -111,16 +110,12 @@
                                  <children>
                                     <ScrollPane layoutX="46.0" layoutY="8.0" prefViewportHeight="224.0" prefViewportWidth="152.0">
                                        <content>
-                                          <VBox fx:id="effectTreeView" layoutX="46.0" layoutY="8.0" prefHeight="224.0" prefWidth="152.0" style="-fx-background-color: red;">
-                                             <children>
-                                                <Label prefHeight="29.0" prefWidth="52.0" text="Effect" />
-                                             </children>
-                                          </VBox>
+                                          <VBox fx:id="effectTreeView" layoutX="46.0" layoutY="8.0" prefHeight="224.0" prefWidth="152.0" style="-fx-background-color: red;" />
                                        </content>
                                     </ScrollPane>
                                  </children>
                               </Pane>
-                              <Button layoutX="268.0" layoutY="40.0" mnemonicParsing="false" onAction="#updateEffectTree" prefHeight="25.0" prefWidth="59.0" text="Button" />
+                              <Button layoutX="268.0" layoutY="40.0" mnemonicParsing="false" onAction="#remove" prefHeight="25.0" prefWidth="59.0" text="Remove" />
                               <Label fx:id="startTime" layoutX="227.0" layoutY="78.0" prefHeight="65.0" prefWidth="113.0" text="Start Time" />
                               <Label fx:id="endTime" layoutX="227.0" layoutY="143.0" prefHeight="65.0" prefWidth="113.0" text="End Time" />
                               <Button layoutX="298.0" layoutY="154.0" mnemonicParsing="false" onAction="#positionOfEffects" prefHeight="73.0" prefWidth="38.0" text="p" />
