@@ -14,6 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 
 public class Skeleton extends Application {
@@ -27,6 +28,7 @@ public class Skeleton extends Application {
         javafx.geometry.Rectangle2D screenBounds = Screen.getPrimary().getBounds();
         System.out.println(screenBounds.getHeight()  + " " + screenBounds.getWidth());
         Scene scene = new Scene(root);
+//        stage.initStyle(StageStyle.UNDECORATED);
         //System.out.println(effectStack.getChildren().get(0));
 //        effectView.getChildren().clear();
 //        effectView.getChildren().add(new Button("hello"));

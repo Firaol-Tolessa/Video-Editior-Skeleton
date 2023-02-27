@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.web.WebEvent;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,8 +36,10 @@ public class Save {
             if(type == "Video" && text == "UNCUT"){
                 if(new File("temp-save.xml").exists()){
                     //open a dialog box to ask for the user to save changes
-                    new File("temp-save.xml").delete();
-                    new Save("Video","",command,isNew);
+                    new File("temp-save.xml").delete();//
+                    Files.delete(new File("temp-save.xml").toPath());
+                    System.out.println("Here");
+                   // new Save("Video","",command,isNew);
                 }else{
                     doc = docBuilder.newDocument();
                     rootElement = doc.createElement("Video");

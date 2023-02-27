@@ -1,23 +1,125 @@
+.container{
+    -fx-background-color: #18122b;
+}
+
+
+#menubar .menu{
+-fx-background-color: #64649B;
+}
+
+#editPane{
+    
+    -fx-background-color: #18122B;   
+}
+#editPane .label{
+    -fx-text-fill: #A4A400;
+    -fx-font-size: 10pt;
+    -fx-font-family: Arial;
+   
+}
+
+#textEditHead{
+     -fx-background-color: #242424;
+}
+#textEditHead .label{
+	-fx-font-size: 13pt;
+}
+
+#fontFamilies,#fontSize {
+ -fx-background-color: #242424;
+}
+
+#textBackgroundColor,#textForegroundColor{
+-fx-background-color: #242424;
+}
+
+#boldCheck,#italicCheck{
+-fx-background-color: #A4A400;
+}
+
+#change{
+-fx-background-color:linear-gradient(#00AFFF, #0083FF);
+        -fx-background-radius: 5,5,4;
+        -fx-background-insets: 0 0 -1 0,0,1;
+        -fx-text-alignment: center;
+-fx-font-size: 13pt;
+-fx-text-fill: white;
+}
+#change:hover{
+ -fx-background-color: #981100;
+}
+#change:onpressed{
+ -fx-background-color: white;
+}
+
+
+
+#videoDiv{
+-fx-background-color:#373737;
+}
+
+#timeline{
+-fx-background-color:#494949;
+}
+#videoTimeLine{
+-fx-background-color:#494949;
+}
+
 .slider {
-    -fx-background-color: red;
+    -fx-background-color: #00005B;
     
 }
 .slider .track{
-    -fx-background-color:aquamarine;
+    -fx-background-color:#A4A400;
 }
 
 #tSlider .thumb{
-    -fx-padding: 14;
-    -f-fx-background-color:black;
+    -fx-padding: 10;
+    -fx-background-color:white;
 }
 
 #tSliderEnd .thumb{
-    -fx-padding: 14;
+    -fx-padding: 10;
     -fx-background-color:black;
 }
+#box{
+-fx-background-color:#000049;
+}
 
-
-#root{
-    -fx-background-image: url("@../../../../../Desktop/logo.png");
+#effectPane,#textSelectionPane{
+ -fx-background-color: #242424;
+    -fx-font-size: 10pt;
+    -fx-font-family: Arial;
+-fx-box-border: transparent;
+}
+#effectTreeView{
+ -fx-background-color: #494949;
+}
+#effectbtn,#trim{
+ -fx-padding: 15px;
+    -fx-border-insets: 4px;
+    -fx-background-insets: 3px;
+ -fx-font-family: Arial;
+ -fx-background-color: #00FFCC;
+}
+#removebtn{
+-fx-padding: 5px;
+    -fx-border-insets: 3px;
+    -fx-background-insets: 3px;
+ -fx-font-family: Arial;
+ -fx-background-color: #00FFCC;
+}
+#textbtn{
+-fx-background-color: #0083FF;
+}
+.root{
      -fx-background-color:aquamarine;
 }
+.split-pane-divider {
+  -fx-padding: 0; 
+}
+.split-pane
+{
+    -fx-padding: 0;
+}
+

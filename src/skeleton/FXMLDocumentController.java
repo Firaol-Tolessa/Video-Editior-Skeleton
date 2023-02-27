@@ -29,6 +29,7 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -56,7 +57,9 @@ import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javax.xml.parsers.DocumentBuilder;
@@ -191,6 +194,11 @@ public class FXMLDocumentController implements Initializable, Runnable {
     }
 
     @FXML
+    private void handleSeek(ActionEvent event) {
+        // mediaplayer.seek(mediaplayer.getCurrentTime() + 0x5);
+    }
+
+    @FXML
     private void handleSlow(ActionEvent event) {
         mediaplayer.setRate(0.5);
     }
@@ -198,6 +206,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
     @FXML
     private void handleExit(ActionEvent event) {
         mediaplayer.dispose();
+        System.exit(0);
     }
 
     @FXML
@@ -302,7 +311,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
     @FXML
     private void addOverlay(ActionEvent event) {
         Label x = new Label(" T e x t ");
-        nodes.put(x, new Effect(x, "0", "5"));
+//        nodes.put(x, new Effect(x, "0", "5"));
         x.setOnMouseDragged(new EventHandler<MouseEvent>() {
 
             @Override
@@ -333,14 +342,14 @@ public class FXMLDocumentController implements Initializable, Runnable {
         effectStack.getChildren().add(x);
         effectStack.getChildren().forEach(this::makeDraggable);
         selectedNode = x;
-
+        updateEffectTree();
     }
 
     // Display all the nodes that are added in Video Player
     private void updateEffectTree() {
         //Clear already existing nodes in the VBOX for refresh functionality
         // effectTreeView.getChildren().clear();
-
+        effectTreeView.getChildren().remove(0, effectTreeView.getChildren().size());
         for (Node node : effectStack.getChildren()) {
 
             if (!node.equals(videoContainer)) {
@@ -351,7 +360,9 @@ public class FXMLDocumentController implements Initializable, Runnable {
                     selectedNode = node;
                     editPane.setVisible(true);
                 });
+
                 effectTreeView.getChildren().add(dummy);
+
             }
         }
 
@@ -362,8 +373,9 @@ public class FXMLDocumentController implements Initializable, Runnable {
 //        effectTreeView.getChildren().remove(0, effectStack.getChildren().size());
 
         effectStack.getChildren().removeAll(effectStack.getChildren());
-
-        File tempSaveFile = new File("temp-save.xml");
+        updateEffectTree();
+        FileChooser chooser = new FileChooser();
+        File tempSaveFile = chooser.showOpenDialog(null);
         try {
             if (tempSaveFile.exists()) {
                 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -387,7 +399,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
                         //prints out the value / command
                         effects.add(node.getElementsByTagName("Value").item(0).getTextContent());
                         load(node.getAttribute("text"), node.getElementsByTagName("Value").item(0).getTextContent());
-                        Label temp = new Label(node.getAttribute("text"));
+                        //Label temp = new Label(node.getAttribute("text"));
                         //  System.out.println(node.getElementsByTagName("Value").item(0).getTextContent());
                     }
                 }
@@ -419,7 +431,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
 
     @FXML
     private void applyChange(ActionEvent event) {
-        System.out.println(selectedNode);
+        //System.out.println(selectedNode);
 
         //Change the selected nod to a type of Lable to change the text
         Label text = (Label) selectedNode;
@@ -522,8 +534,8 @@ public class FXMLDocumentController implements Initializable, Runnable {
                     + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
                     + " -fx-font-size: " + fontSize.getValue() + " ; "
                     + " -fx-font-family : Arial ; ";
-        } else if (textBackgroundColor.getValue() == null && textForegroundColor.getValue() == null
-                && fontSize.getValue() == null && fontFamilies.getValue() == null) {
+        } else if (textBackgroundColor.getValue() != null && textForegroundColor.getValue() != null
+                && fontSize.getValue() != null && fontFamilies.getValue() != null) {
             command += " -fx-background-color: " + toRGBCode(textBackgroundColor.getValue()) + " ; "
                     + " -fx-text-fill: " + toRGBCode(textForegroundColor.getValue()) + " ; "
                     + " -fx-font-size: " + fontSize.getValue() + " ; "
@@ -539,6 +551,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
             command += " -fx-font-style : italic ;";
         }
 
+        System.out.println("Command :" + command);
         //Style the selected node using that setting   
         selectedNode.setStyle(command);
 
@@ -595,7 +608,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
                 System.out.println("Counter : " + counter + "Counter 2 : " + counter2);
                 System.out.println("Effect Stack tree Children number : " + effectStack.getChildren().size());
 
-                if (counter2 < 2) {
+                if (counter2 < effectStack.getChildren().size()) {
                     Node node = effectStack.getChildren().get(counter2);
                     boundsInScene = node.localToParent(node.getBoundsInLocal());
 
@@ -731,7 +744,7 @@ public class FXMLDocumentController implements Initializable, Runnable {
                         if (node.getAttribute("text").equals(temp.getText())) {
                             System.out.println("Node Name : " + node.getAttribute("text") + " = " + temp.getText());
                             node.getParentNode().removeChild(node);
-
+                            //effectTreeView.getScene().getWindow().setWidth(effectTreeView.getScene().getWidth() + 0.001);
                             Transformer transformer = TransformerFactory.newInstance().newTransformer();
                             Result out = new StreamResult(new File("temp-save.xml"));
                             Source in = new DOMSource(doc);
@@ -750,7 +763,26 @@ public class FXMLDocumentController implements Initializable, Runnable {
             }
 
         }
-        updateEffectTree();
+
+    }
+
+    @FXML
+    private void saveFileLocation() {
+        try {
+            DirectoryChooser directorychooser = new DirectoryChooser();
+            File selectedDirectory = directorychooser.showDialog(null);
+
+            File srcFile = new File("temp-save.xml");
+            System.out.println(selectedDirectory.getAbsoluteFile() + "\\Temp-File.xml");
+            String[] args = {"cmd", "/c", "copy", srcFile.getAbsolutePath() + "", selectedDirectory.getAbsoluteFile() + "\\Temp-File.xml"};
+            Process copy = Runtime.getRuntime().exec(args);
+            copy.waitFor();
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     // Handels the video loading and controls
@@ -760,7 +792,13 @@ public class FXMLDocumentController implements Initializable, Runnable {
         int rand = (int) (Math.random() * 3);
         Rectangle block = new Rectangle(videoTimeLine.getWidth(), videoTimeLine.getHeight());
         block.setFill(colors[rand]);
-        videoTimeLine.getChildren().add(block);
+        
+        if (videoTimeLine.getChildren().size() == 0) {
+            videoTimeLine.getChildren().add(block);
+        } else {
+            videoTimeLine.getChildren().remove(0, videoTimeLine.getChildren().size());
+            videoTimeLine.getChildren().add(block);
+        }
 
         if (mediaplayer != null) {
             //   mediaplayer.stop();
@@ -905,17 +943,17 @@ public class FXMLDocumentController implements Initializable, Runnable {
         if (new File("temp-save.xml").exists()) {
             //new File("temp-save.xml").delete();
         }
-
+        textForegroundColor.setValue(Color.BLACK);
         tSliderEnd.setVisible(false);
         trim.setVisible(false);
         editPane.setVisible(false);
         textSelectionPane.setVisible(false);
-        //Initializing the text editing window parameters
+//        Initializing the text editing window parameters
         String[] fonts = {"Arial", "MAGNETOB", "OLDENGL", "SCRIPTBL"};
         String[] fontSizes = {"10", "15", "30", "40", "50"};
 
         fontSize.getItems().addAll(fontSizes);
-        //initalize Font Families
+//        initalize Font Families
         fontFamilies.getItems().addAll(fonts);
 
         //Delete previous states

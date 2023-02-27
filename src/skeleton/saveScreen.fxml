@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="337.0" prefWidth="365.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skeleton.FXMLDocumentController1">
+   <children>
+      <TextField fx:id="fileName" layoutX="64.0" layoutY="84.0" />
+      <TextField fx:id="directorySelected" layoutX="64.0" layoutY="137.0" />
+      <Button layoutX="138.0" layoutY="233.0" mnemonicParsing="false" onAction="#saveFile" text="Save" />
+      <Button layoutX="232.0" layoutY="137.0" mnemonicParsing="false" onAction="#loadFile" text="Dir" />
+      <Label layoutX="244.0" layoutY="88.0" text="fileName" />
+   </children>
+</AnchorPane>
